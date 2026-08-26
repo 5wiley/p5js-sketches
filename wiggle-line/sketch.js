@@ -3,26 +3,16 @@ let peaks;
 
 async function setup() {
     createCanvas(800, 800);
-    noLoop();
+    // noLoop();
 }
 
 function draw() {
     frameRate(30);
     background(220);
     mycircle(
-        createVector(400,400),
+        createVector(400, 400),
         100,
-        12
-    );
-    mycircle(
-        createVector(400,400),
-        120,
-        12
-    );
-    mycircle(
-        createVector(400,400),
-        160,
-        12
+        360
     );
 }
 
@@ -33,24 +23,28 @@ function mycircle(origin, radius, numPoints) {
 
     // get array of vectors along circle edge.
     let vectors = [];
-    let magnitude
     // Calculate vectors
-    for(let i = 0; i < numPoints; i++) {
-        let angle = i * ( TWO_PI / numPoints );
-        let mag = radius * (random(0,1) * 0.2 + 1);
+    for (let i = 0; i < numPoints; i++) {
+        let angle = i * (TWO_PI / numPoints);
+
+        // sin function windows the peaks and also the jaggedness of noise
+        let windowValue = map(sin(i * 0.5 - frameCount), -1, 1, 0, 1);
+        let noiseValue = noise(i / 0.2) * (windowValue * 0.4) + 1;
+
+        let mag = radius * noiseValue;
         // cos(angle) and sin(angle) give the horizontal
         // and vertical offset from the center, respectively.
         // Magnitude is the distance from the center.
         let x = origin.x + mag * cos(angle);
         let y = origin.y + mag * sin(angle);
-        vectors[i] = createVector(x,y);
+        vectors[i] = createVector(x, y);
     }
 
     // Draw circle
     noFill();
     beginShape();
-    for(let i = 0; i < numPoints; i++) {
-        circle(vectors[i].x, vectors[i].y, 5);
+    for (let i = 0; i < numPoints; i++) {
+        // circle(vectors[i].x, vectors[i].y, 5);
         splineProperty('tightness', 0.1)
         splineVertex(vectors[i].x, vectors[i].y)
 
