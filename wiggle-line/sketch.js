@@ -22,6 +22,12 @@ function mycircle(origin, radius, numPoints) {
     // const numPoints = 32;
 
     // get array of vectors along circle edge.
+    let planetPoints = {}
+    for(let i = 0; i < numPoints; i++) {
+        let angle = i * (TWO_PI / numPoints);
+        let magnitude = radius;
+    }
+
     let vectors = [];
     // Calculate vectors
     for (let i = 0; i < numPoints; i++) {
