@@ -3,7 +3,7 @@ let peaks;
 
 async function setup() {
     createCanvas(800, 800);
-    // noLoop();
+    noLoop();
 }
 
 function draw() {
@@ -14,25 +14,47 @@ function draw() {
     //     100,
     //     360
     // );
-    mkPlanet();
+    let origin = createVector(width / 2, height / 2)
+    let planet = mkPlanet(origin, 200, 32);
+    drawPlanet(planet);
 }
 
 function mkPlanet(origin, radius, numPoints) {
-    let points = [];
+    let vectors = []
     for (let i = 0; i < numPoints; i++) {
-        let myVector = {};
-        myVector.angle = i * (TWO_PI / numPoints);
-        myVector.magnitude = radius;
+        let vector = createVector(origin.x, origin.y);
+        vector = vector.setMag(radius);
+        vector = vector.setHeading(i * (TWO_PI / numPoints));
 
-        points[i] = myVector;
+        // let circleX = origin.x + vector.mag() * cos(vector.heading());
+        // let circleY = origin.y + vector.mag() * sin(vector.heading());
+        // circle(circleX, circleY, 5)
+
+        vectors[i] = vector;
     }
 
     let planet = {
-        edge: points,
-        origin: origin
-    };
-
+        origin: origin,
+        vectors: vectors,
+    }
     return planet;
+}
+
+function drawPlanet(planet) {
+    // let vectors = planet.vectors;
+
+    // console.log(planet.vectors[1].mag())
+    for (let vector of planet.vectors) {
+        // for (let i = 0; i < len(vectors); i++) {
+        console.log("====================================")
+        console.log(vector.x)
+        console.log(vector.y)
+        circle(
+            planet.origin.x + vector.mag() * cos(vector.heading()),
+            planet.origin.y + vector.mag() * sin(vector.heading()),
+            5
+        )
+    }
 }
 
 // function mycircle(origin, radius, numPoints) {
@@ -54,9 +76,7 @@ function mkPlanet(origin, radius, numPoints) {
 // // Calculate vectors
 // for (let i = 0; i < numPoints; i++) {
 //     let angle = i * (TWO_PI / numPoints);
-
-//     // sin function windows the peaks and also the jaggedness of noise
-//     let windowValue = map(sin(i * 0.5 - frameCount), -1, 1, 0, 1);
+//     let windowValue = map(sin(i * 0.5 - frameCount)l;a -1, 1, 0, 1);
 //     let noiseValue = noise(i / 0.2) * (windowValue * 0.4) + 1;
 
 //     let mag = radius * noiseValue;
