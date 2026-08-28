@@ -16,6 +16,7 @@ function draw() {
     // );
     let origin = createVector(width / 2, height / 2)
     let planet = mkPlanet(origin, 200, 32);
+    planet = randomPlanet(planet);
     drawPlanet(planet);
 }
 
@@ -36,6 +37,16 @@ function mkPlanet(origin, radius, numPoints) {
     let planet = {
         origin: origin,
         vectors: vectors,
+    }
+    return planet;
+}
+
+function randomPlanet(planet) {
+    // it seems for loops of this type retain reference to the original object!
+    for (let vector of planet.vectors) {
+        let mag = vector.mag();
+        mag = mag * (random(-1, 1) * 0.1 + 1)
+        vector = vector.setMag(mag)
     }
     return planet;
 }
