@@ -1,71 +1,94 @@
 let sound;
 let peaks;
 
+let planet;
+
 async function setup() {
     createCanvas(800, 800);
-    noLoop();
+    // noLoop();
+
+    let origin = createVector(width / 2, height / 2)
+    planet = mkPlanet(origin, 200, 410);
+    planet = staticRoughPlanet(planet);
 }
 
 function draw() {
     frameRate(30);
     background(220);
-    // mycircle(
-    //     createVector(400, 400),
-    //     100,
-    //     360
-    // );
-    let origin = createVector(width / 2, height / 2)
-    let planet = mkPlanet(origin, 200, 32);
-    planet = randomPlanet(planet);
+
+    planet = wavyPlanet(planet);
     drawPlanet(planet);
 }
 
 function mkPlanet(origin, radius, numPoints) {
-    let vectors = []
+    let points = []
     for (let i = 0; i < numPoints; i++) {
         let vector = createVector(origin.x, origin.y);
         vector = vector.setMag(radius);
         vector = vector.setHeading(i * (TWO_PI / numPoints));
 
-        // let circleX = origin.x + vector.mag() * cos(vector.heading());
-        // let circleY = origin.y + vector.mag() * sin(vector.heading());
-        // circle(circleX, circleY, 5)
-
-        vectors[i] = vector;
+        let point = { vector: vector }
+        points[i] = point;
     }
 
     let planet = {
         origin: origin,
-        vectors: vectors,
+        numPoints: numPoints,
+        points: points
     }
     return planet;
 }
 
-function randomPlanet(planet) {
+function staticRoughPlanet(planet) {
+    let i = 0;
     // it seems for loops of this type retain reference to the original object!
-    for (let vector of planet.vectors) {
-        let mag = vector.mag();
-        mag = mag * (random(-1, 1) * 0.1 + 1)
-        vector = vector.setMag(mag)
+    for (let point of planet.points) {
+        point.roughness = noise(i)
+        i++
+    }
+    return planet;
+}
+
+function wavyPlanet(planet) {
+    let i = 0;
+    for (let point of planet.points) {
+        let mag = point.vector.mag()
+
+        let freq = (planet.numPoints / 2) / planet.numPoints
+        console.log(freq)
+        let windowValue = sin(i * freq + (frameCount / 2))
+        windowValue = map(windowValue, -1, 1, 0, 1) * 0.3
+
+        point.window = windowValue
+
+        let newMag = mag * (point.roughness * windowValue + 1)
+        point.newVector = p5.Vector.setMag(point.vector, newMag)
+
+        i++;
     }
     return planet;
 }
 
 function drawPlanet(planet) {
-    // let vectors = planet.vectors;
+    // noFill();
+    beginShape();
+    for (let point of planet.points) {
 
-    // console.log(planet.vectors[1].mag())
-    for (let vector of planet.vectors) {
-        // for (let i = 0; i < len(vectors); i++) {
-        console.log("====================================")
-        console.log(vector.x)
-        console.log(vector.y)
-        circle(
-            planet.origin.x + vector.mag() * cos(vector.heading()),
-            planet.origin.y + vector.mag() * sin(vector.heading()),
-            5
-        )
+        // circle(
+        //     planet.origin.x + point.vector.mag() * cos(point.vector.heading()),
+        //     planet.origin.y + point.vector.mag() * sin(point.vector.heading()),
+        //     5
+        // )
+
+        let x = point.newVector.x + planet.origin.x
+        let y = point.newVector.y + planet.origin.y
+        splineProperty('tightness', 0.1)
+        splineVertex(x, y)
+
+        // reset newVector to original vector
+        point.newVector = point.vector.copy()
     }
+    endShape(CLOSE);
 }
 
 // function mycircle(origin, radius, numPoints) {
