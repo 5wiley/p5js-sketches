@@ -1,6 +1,7 @@
 let sound;
 let peaks;
 
+let planets = [];
 let planet;
 
 async function setup() {
@@ -8,16 +9,24 @@ async function setup() {
     // noLoop();
 
     let origin = createVector(width / 2, height / 2)
-    planet = mkPlanet(origin, 200, 410);
-    planet = staticRoughPlanet(planet);
+
+    planets[0] = mkPlanet(origin, 200, 410);
+    planets[0] = staticRoughPlanet(planets[0]);
+
+    planets[1] = mkPlanet(origin, 300, 410);
+    planets[1] = staticRoughPlanet(planets[1]);
 }
 
 function draw() {
     frameRate(30);
     background(220);
 
-    planet = wavyPlanet(planet);
-    drawPlanet(planet);
+    planets[1] = wavyPlanet(planets[1], 1 / 4);
+    drawPlanet(planets[1]);
+
+    planets[0] = wavyPlanet(planets[0], 1 / 2);
+    drawPlanet(planets[0]);
+
 }
 
 function mkPlanet(origin, radius, numPoints) {
@@ -34,7 +43,8 @@ function mkPlanet(origin, radius, numPoints) {
     let planet = {
         origin: origin,
         numPoints: numPoints,
-        points: points
+        points: points,
+        phase: 0
     }
     return planet;
 }
@@ -49,14 +59,13 @@ function staticRoughPlanet(planet) {
     return planet;
 }
 
-function wavyPlanet(planet) {
+function wavyPlanet(planet, freq) {
     let i = 0;
     for (let point of planet.points) {
         let mag = point.vector.mag()
 
-        let freq = (planet.numPoints / 2) / planet.numPoints
-        console.log(freq)
-        let windowValue = sin(i * freq + (frameCount / 2))
+        // let freq = (planet.numPoints / 2) / planet.numPoints
+        let windowValue = sin(i * freq + planet.phase)
         windowValue = map(windowValue, -1, 1, 0, 1) * 0.3
 
         point.window = windowValue
@@ -70,16 +79,8 @@ function wavyPlanet(planet) {
 }
 
 function drawPlanet(planet) {
-    // noFill();
     beginShape();
     for (let point of planet.points) {
-
-        // circle(
-        //     planet.origin.x + point.vector.mag() * cos(point.vector.heading()),
-        //     planet.origin.y + point.vector.mag() * sin(point.vector.heading()),
-        //     5
-        // )
-
         let x = point.newVector.x + planet.origin.x
         let y = point.newVector.y + planet.origin.y
         splineProperty('tightness', 0.1)
@@ -89,6 +90,8 @@ function drawPlanet(planet) {
         point.newVector = point.vector.copy()
     }
     endShape(CLOSE);
+
+    planet.phase += mouseX / width
 }
 
 // function mycircle(origin, radius, numPoints) {
