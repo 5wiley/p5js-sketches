@@ -5,15 +5,15 @@ let planets = [];
 let planet;
 
 async function setup() {
-    createCanvas(800, 800);
+    createCanvas(1600, 800);
     // noLoop();
 
     let origin = createVector(width / 2, height / 2)
 
-    planets[0] = mkPlanet(origin, 200, 410);
+    planets[0] = mkPlanet(createVector(width / 2, 0), 200, 410);
     planets[0] = staticRoughPlanet(planets[0]);
 
-    planets[1] = mkPlanet(origin, 300, 410);
+    planets[1] = mkPlanet(createVector(width / 2, height), 200, 410);
     planets[1] = staticRoughPlanet(planets[1]);
 }
 
@@ -21,11 +21,13 @@ function draw() {
     frameRate(30);
     background(220);
 
-    planets[1] = wavyPlanet(planets[1], 1 / 4);
-    drawPlanet(planets[1]);
-
     planets[0] = wavyPlanet(planets[0], 1 / 2);
+    planets[0] = movePlanet(planets[0])
     drawPlanet(planets[0]);
+
+    planets[1] = wavyPlanet(planets[1], 1 / 2);
+    planets[1] = movePlanet(planets[1])
+    drawPlanet(planets[1]);
 
 }
 
@@ -42,6 +44,7 @@ function mkPlanet(origin, radius, numPoints) {
 
     let planet = {
         origin: origin,
+        radius: radius,
         numPoints: numPoints,
         points: points,
         phase: 0
@@ -75,6 +78,18 @@ function wavyPlanet(planet, freq) {
 
         i++;
     }
+    return planet;
+}
+
+function movePlanet(planet) {
+    let movement = createVector(0, -2)
+    let upperBoundary = planet.radius + (height / 10)
+    let lowerBoundary = height + planet.radius + (height / 10)
+    if (planet.origin.y < -upperBoundary) {
+        planet.origin = createVector(planet.origin.x, lowerBoundary)
+    }
+    planet.origin.add(movement);
+
     return planet;
 }
 
