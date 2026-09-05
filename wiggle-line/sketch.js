@@ -9,26 +9,16 @@ async function setup() {
     // noLoop();
 
     let origin = createVector(width / 2, height / 2)
-
-    planets[0] = mkPlanet(createVector(width / 2, 0), 200, 410);
-    planets[0] = staticRoughPlanet(planets[0]);
-
-    planets[1] = mkPlanet(createVector(width / 2, height), 200, 410);
-    planets[1] = staticRoughPlanet(planets[1]);
+    planet = mkPlanet(origin, 200, 360);
+    planet = staticRoughPlanet(planet);
 }
 
 function draw() {
-    frameRate(30);
+    frameRate(24);
     background(220);
 
-    planets[0] = wavyPlanet(planets[0], 1 / 2);
-    planets[0] = movePlanet(planets[0])
-    drawPlanet(planets[0]);
-
-    planets[1] = wavyPlanet(planets[1], 1 / 2);
-    planets[1] = movePlanet(planets[1])
-    drawPlanet(planets[1]);
-
+    // planet = wavyPlanet(planet);
+    drawPlanet(planet);
 }
 
 function mkPlanet(origin, radius, numPoints) {
@@ -38,7 +28,10 @@ function mkPlanet(origin, radius, numPoints) {
         vector = vector.setMag(radius);
         vector = vector.setHeading(i * (TWO_PI / numPoints));
 
-        let point = { vector: vector }
+        let point = {
+            vector: vector,
+            newVector: vector,
+        }
         points[i] = point;
     }
 
@@ -47,7 +40,7 @@ function mkPlanet(origin, radius, numPoints) {
         radius: radius,
         numPoints: numPoints,
         points: points,
-        phase: 0
+        window: 0,
     }
     return planet;
 }
@@ -67,8 +60,8 @@ function wavyPlanet(planet, freq) {
     for (let point of planet.points) {
         let mag = point.vector.mag()
 
-        // let freq = (planet.numPoints / 2) / planet.numPoints
-        let windowValue = sin(i * freq + planet.phase)
+        let freq = (planet.numPoints / 2) / planet.numPoints
+        let windowValue = sin(i * freq + (frameCount / 2))
         windowValue = map(windowValue, -1, 1, 0, 1) * 0.3
 
         point.window = windowValue
@@ -95,14 +88,17 @@ function movePlanet(planet) {
 
 function drawPlanet(planet) {
     beginShape();
+    let i = 0
     for (let point of planet.points) {
-        let x = point.newVector.x + planet.origin.x
-        let y = point.newVector.y + planet.origin.y
+        let x = point.newVector.x + planet.origin.x + (sin(i * 5 - (frameCount / 2)) * 50)
+        let y = point.newVector.y + planet.origin.y + (sin(i * 5 - (frameCount / 2)) * 50)
+
         splineProperty('tightness', 0.1)
         splineVertex(x, y)
 
         // reset newVector to original vector
         point.newVector = point.vector.copy()
+        i++
     }
     endShape(CLOSE);
 
